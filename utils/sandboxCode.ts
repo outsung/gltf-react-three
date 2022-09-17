@@ -1,6 +1,10 @@
 import { isGlb } from './isExtension'
+import { UseSandboxProps } from './useSandbox'
 
-export const sandboxCode = ({ fileName, textOriginalFile, code, config }) => {
+export interface SandboxCodeFiles {
+  files: { [x: string]: { content: string | {} } }
+}
+export const sandboxCode = ({ fileName, textOriginalFile, code, config }: UseSandboxProps): SandboxCodeFiles => {
   const TSDeps = config.types
     ? {
         devDependencies: {
@@ -11,6 +15,7 @@ export const sandboxCode = ({ fileName, textOriginalFile, code, config }) => {
         },
       }
     : { devDependencies: { 'react-scripts': '5.0.1' } }
+
   return {
     files: {
       'public/index.html': {

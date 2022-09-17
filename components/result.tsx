@@ -8,6 +8,7 @@ import useSandbox from '../utils/useSandbox'
 import Viewer from './viewer'
 import Code from './code'
 import useStore from '../utils/store'
+import { ButtonInput } from 'leva/dist/declarations/src/types'
 
 const Result = () => {
   const { buffer, fileName, textOriginalFile, scene, code, createZip, generateScene, animations } = useStore()
@@ -59,11 +60,11 @@ const Result = () => {
   }, [config])
 
   const download = useCallback(async () => {
-    createZip({ sandboxCode })
+    sandboxCode && createZip({ sandboxCode })
   }, [sandboxCode, fileName, textOriginalFile, buffer])
 
   const exports = useMemo(() => {
-    const temp = {}
+    const temp: Record<string, ButtonInput> = {}
     temp['copy to clipboard'] = button(() =>
       toast.promise(copy(code), {
         loading: 'Loading',
@@ -109,12 +110,10 @@ const Result = () => {
       ) : (
         <div className="grid grid-cols-5 h-full">
           {code && <Code>{code}</Code>}
-          <section className="h-full w-full col-span-2">
-            {scene && <Viewer scene={scene} {...config} {...preview} />}
-          </section>
+          <section className="h-full w-full col-span-2">{scene && <Viewer {...config} {...preview} />}</section>
         </div>
       )}
-      <Leva hideTitleBar collapsed />
+      <Leva collapsed />
     </div>
   )
 }

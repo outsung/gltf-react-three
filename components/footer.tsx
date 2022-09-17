@@ -1,3 +1,4 @@
+import React from 'react'
 import { GitHub, Logo } from './icons'
 
 const Footer = () => (

@@ -1,10 +1,15 @@
-import { useDropzone } from 'react-dropzone'
+import React from 'react'
+import { DropzoneOptions, useDropzone, Accept } from 'react-dropzone'
 
-const FileDrop = ({ onDrop, useSuzanne }) => {
+interface FileDropProps {
+  onDrop: DropzoneOptions['onDrop']
+  useSuzanne: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+}
+const FileDrop = ({ onDrop, useSuzanne }: FileDropProps) => {
   const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
     onDrop,
     maxFiles: 1,
-    accept: '.gltf, .glb',
+    accept: '.gltf, .glb' as unknown as Accept,
   })
 
   return (

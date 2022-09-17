@@ -1,20 +1,35 @@
 import { saveAs } from 'file-saver'
 import create from 'zustand'
-import { createZip } from '../utils/createZip'
-import { parse } from 'gltfjsx'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { createZip } from './createZip'
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import prettier from 'prettier/standalone'
 import parserBabel from 'prettier/parser-babel'
 import parserTS from 'prettier/parser-typescript'
-import { REVISION } from 'three'
+import { Group, REVISION } from 'three'
 import { WebGLRenderer } from 'three'
+import { SandboxCodeFiles } from './sandboxCode'
 
-let gltfLoader
+const { parse } = require('gltfjsx')
+const MeshoptDecoder = require('three/examples/jsm/libs/meshopt_decoder.module.js')
+
+interface ParseConfig {
+  types: boolean
+  shadows: boolean
+  instanceall: boolean
+  instance: boolean
+  verbose: boolean
+  keepnames: boolean
+  keepgroups: boolean
+  aggressive: boolean
+  meta: boolean
+  precision: number
+}
+
+let gltfLoader: GLTFLoader
 if (typeof window !== 'undefined') {
-  const THREE_PATH = `https://unpkg.com/three@0.${REVISION}.x`
+  const THREE_PATH = `https://unpkg.zcom/three@0.${REVISION}.x`
   const dracoloader = new DRACOLoader().setDecoderPath(`${THREE_PATH}/examples/js/libs/draco/gltf/`)
   const ktx2Loader = new KTX2Loader().setTranscoderPath(`${THREE_PATH}/examples/js/libs/basis/`)
 
@@ -25,7 +40,17 @@ if (typeof window !== 'undefined') {
     .setMeshoptDecoder(MeshoptDecoder)
 }
 
-const useStore = create((set, get) => ({
+interface Store {
+  fileName: string
+  buffer: string | null
+  textOriginalFile: string
+  animations: boolean
+  code: string
+  scene: Group | null
+  createZip: (options: { sandboxCode: SandboxCodeFiles }) => void
+  generateScene: (config: ParseConfig) => void
+}
+const useStore = create<Store>((set, get) => ({
   fileName: '',
   buffer: null,
   textOriginalFile: '',
@@ -33,7 +58,7 @@ const useStore = create((set, get) => ({
   code: '',
   scene: null,
   createZip: async ({ sandboxCode }) => {
-    await import('../utils/createZip').then((mod) => mod.createZip)
+    await import('./createZip').then((mod) => mod.createZip)
     const { fileName, textOriginalFile, buffer } = get()
     const blob = await createZip({ sandboxCode, fileName, textOriginalFile, buffer })
 
@@ -41,9 +66,9 @@ const useStore = create((set, get) => ({
   },
   generateScene: async (config) => {
     const { fileName, buffer } = get()
-    const result = await new Promise((resolve, reject) => gltfLoader.parse(buffer, '', resolve, reject))
+    const result = await new Promise<GLTF>((resolve, reject) => gltfLoader.parse(buffer as string, '', resolve, reject))
 
-    const code = parse(fileName, result, { ...config, printwidth: 100 })
+    const code = parse(fileName, result, { ...config, printwidth: 100 }) as string
 
     try {
       const prettierConfig = config.types

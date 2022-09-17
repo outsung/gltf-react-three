@@ -1,7 +1,8 @@
+import React from 'react'
 import theme from 'prism-react-renderer/themes/nightOwlLight'
 import Highlight, { defaultProps } from 'prism-react-renderer'
 
-const Code = ({ children }) => {
+const Code = ({ children }: { children: string }) => {
   return (
     <Highlight {...defaultProps} theme={theme} code={children} language="jsx">
       {({ className, style, tokens, getLineProps, getTokenProps }) => (

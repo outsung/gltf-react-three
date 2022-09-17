@@ -1,14 +1,33 @@
+import { ViewerProps } from 'components/viewer'
 import { useEffect, useState } from 'react'
-import { sandboxCode } from './sandboxCode'
+import { sandboxCode, SandboxCodeFiles } from './sandboxCode'
 
-const useSandbox = (props) => {
-  const [sandboxId, setSandboxId] = useState()
+interface Config extends ViewerProps {
+  types: boolean
+  shadows: boolean
+  instanceall: boolean
+  instance: boolean
+  verbose: boolean
+  keepnames: boolean
+  keepgroups: boolean
+  aggressive: boolean
+  meta: boolean
+  precision: number
+}
+
+export interface UseSandboxProps {
+  fileName: string
+  textOriginalFile: string
+  code: string
+  config: Config
+}
+const useSandbox = (props: UseSandboxProps) => {
+  const [sandboxId, setSandboxId] = useState<string>()
   const [loading, setLoading] = useState(false)
   const [error, setErr] = useState(false)
-  const [sandboxCodeReturn, setSandboxCode] = useState()
+  const [sandboxCodeReturn, setSandboxCode] = useState<SandboxCodeFiles>()
 
   const createSandbox = async () => {
-    setSandboxCode()
     setSandboxCode(sandboxCode(props))
     setLoading(true)
     setErr(false)
@@ -23,7 +42,7 @@ const useSandbox = (props) => {
       }).then((x) => x.json())
 
       if (data.sandbox_id) {
-        setSandboxId(data.sandbox_id)
+        setSandboxId(data.sandbox_id as string)
       } else {
         setErr(true)
       }
@@ -37,7 +56,7 @@ const useSandbox = (props) => {
     createSandbox()
   }, [props.code])
 
-  return [loading, sandboxId, error, sandboxCodeReturn]
+  return [loading, sandboxId, error, sandboxCodeReturn] as const
 }
 
 export default useSandbox

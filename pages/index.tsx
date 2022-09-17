@@ -1,3 +1,4 @@
+import React from 'react'
 import { useCallback } from 'react'
 import { Toaster } from 'react-hot-toast'
 import dynamic from 'next/dynamic'
@@ -20,21 +21,21 @@ export default function Home() {
     buffer: state.buffer,
   }))
 
-  const onDrop = useCallback((acceptedFiles) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader()
       reader.onabort = () => console.error('file reading was aborted')
       reader.onerror = () => console.error('file reading has failed')
       reader.onload = async () => {
-        const data = reader.result
+        const data = reader.result as string
         useStore.setState({ buffer: data, fileName: file.name })
-        arrayBufferToString(data, (a) => useStore.setState({ textOriginalFile: a }))
+        arrayBufferToString(data, (a) => useStore.setState({ textOriginalFile: a as string }))
       }
       reader.readAsArrayBuffer(file)
     })
   }, [])
 
-  const useSuzanne = (e) => {
+  const useSuzanne = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault()
     e.stopPropagation()
     useStore.setState({ buffer: suzanne, fileName: 'suzanne.gltf', textOriginalFile: suzanne })
